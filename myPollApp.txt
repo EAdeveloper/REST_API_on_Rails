@@ -1,0 +1,73 @@
+-rails new myPollApp
+Add those gems inside development group:
+ gem 'shoulda-matchers'
+ gem 'rspec-rails'
+ gem 'factory_girl_rails'
+ gem 'capybara'
+Run bundle install
+
+>rails g model User email name provider uid
+>rake db:migrate if any  mistake run rake db:rollback
+>rails g rspec:install , rails db:migrate RAILS_ENV=test
+
+================================rspec================
+https://github.com/rspec/rspec-rails
+https://github.com/thoughtbot/shoulda-matchers
+------------------
+You can supply this information by using a configuration block. Place the following in rails_helper.rb:
+
+Shoulda::Matchers.configure do |config|
+require 'shoulda/matchers'
+
+Shoulda::Matchers.configure do |config|
+  config.integrate do |with|
+    # Choose a test framework:
+    with.test_framework :rspec
+    # with.test_framework :minitest
+    # with.test_framework :minitest_4
+    # with.test_framework :test_unit
+
+    # # Choose one or more libraries:
+    # with.library :active_record
+    # with.library :active_model
+    # with.library :action_controller
+    # Or, choose the following (which implies all of the above):
+    with.library :rails
+  end
+end
+==================================================
+Firts test type this in factories/models/user_spec.rb
+	require 'rails_helper'
+
+	RSpec.describe User, type: :model do
+  	it { should validate_presence_of(:email) }
+	it { should_not allow_value("eda@codigo").for(:email) }
+	it { should allow_value("eda@codigo.com").for(:email) }
+  
+
+	end
+This should fail, to be able to past the test validate in model for user in model/user.rb type this:
+  validates :email, presence: true
+#####You did pass you firt test hurray!!!!!!!
+----------------
+To be able to test email add this gem 
+https://github.com/hallelujah/valid_email
+- gem 'valid_email'
+IN models/user.rb change the line to this> 
+	validates :email, presence: true, email: true
+Run >rspec , and all this 3 test should past succesfully '"hurray"''
+-----------------
+Add two more test to user.spec.rb;
+  it { should validate_presence_of(:email) }
+  it { should_not allow_value("eda@codigo").for(:email) }
+  it { should allow_value("eda@codigo.com").for(:email) }
+  it { should validate_presence_of(:uid) }
+  it { should validate_presence_of(:provider) }
+
+Then validate in the model models/user.rb
+ 	validates :email, presence: true, email: true
+	validates :uid, presence: true
+	validates :provider, presence: true
+All 5 test should past!
+>   5 examples, 0 failures
+
