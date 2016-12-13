@@ -4,5 +4,6 @@ class User < ApplicationRecord
 	validates :uid, presence: true
 	validates :provider, presence: true
 
+	has_many :tokens
 
 end

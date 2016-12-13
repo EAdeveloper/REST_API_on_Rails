@@ -70,4 +70,89 @@ Then validate in the model models/user.rb
 	validates :provider, presence: true
 All 5 test should past!
 >   5 examples, 0 failures
+=============================================
+2-How to authenticate users with tokens
+=============================================
+*Tokens_tbl
+	-id user->Token with user
+	-Random string ex-> 123bcdssldc41681asfjsa
+	-Expiration date
+	-user_id <-Foreign Key<- makes faster search for queries
+	
+*User_tbl
+	-User will has many tokens
+
+*Applications_tbl
+	-Secrept key
+	-App ID
+-----------------------------
+Create table Token
+>rails g model Token expires_at:datetime user:references token
+Add this to models/user.rb 
+	has_many :tokens
+Add this in models/token.rb
+  before_create :generate_token
+
+  private
+  # This is rails method to genrate random tokens
+  def generate_token
+  	# Ciclo do while in rails
+  		begin
+  		self.token = SecureRandom.hex
+  		end while Token.where(token: self.token).any?
+  		#expires for 1 montn 'from_now is a helper of rails'
+  		self.expires_at = 1.month.from_now 
+  end
+----------
+How to use factory_girl
+https://github.com/thoughtbot/factory_girl_rails
+----------
+Add this in factories/tokens.tb
+ 	factory :token do
+         expires_at "2016-12-12 19:34:35"
+    	# user nil
+   	 # token "MyString"
+   	 association :user, factory: :user
+  end
+
+In factories/users.rb fill the fields like
+	 email "eda@codigo.com"
+    	name "Uriel"
+    	provider "github"
+    	uid "duah18wd21qwq2w1"
+Add this method in models/token.rb
+	 def is_valid?
+
+  	 end
+----------------
+if has pending migrations run: rails db:migrate RAILS_ENV=test
+Then run 'rspec' , this test should fail
+In models/token.rb make the method
+	  def is_valid?
+    DateTime.now < self.expires_at
+  end
+
+  private
+  # This is rails method to genrate random tokens
+  def generate_token
+  	# Ciclo do while in rails
+  		begin
+  		  self.token = SecureRandom.hex
+  		end while Token.where(token: self.token).any?
+  		#expires for 1 montn 'from_now is a helper of rails'
+  		self.expires_at ||= 1.month.from_now 
+  end
+---------
+In factories/models/token_spec.rb add this two tests:
+ it "should return valid when is not expired" do
+  	token = FactoryGirl.create(:token,expires_at: DateTime.now + 1.minute)
+  	expect(token.is_valid?).to eq(true)
+  end
+
+  it "should return invalid when is expired" do
+  	token = FactoryGirl.create(:token,expires_at: DateTime.now - 1.day)
+  	expect(token.is_valid?).to eq(false)
+  end
+---
+Then run> rspec and all test should past "Hurrayyyy"
 
